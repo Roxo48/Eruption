@@ -8,48 +8,51 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
+import static com.projectkorra.projectkorra.ability.CoreAbility.getAbility;
+
 public class Listener implements org.bukkit.event.Listener {
 
-    private final Eruption eruption;
+    private  final Eruption eruption;
 
     public Listener(Eruption eruption) {
         this.eruption = eruption;
     }
-
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event){
         Player player = event.getPlayer();
 
         if(!event.isSneaking())return;
-        BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-        if (bendingPlayer == null) return;
 
-        if (bendingPlayer.canBend(CoreAbility.getAbility(Eruption.class))) {
-            new Eruption(player);
+        Eruption eruption = CoreAbility.getAbility(player, Eruption.class);
+
+        System.out.println("click");
+
+        if (eruption != null) {
+            System.out.println("click WORKS");
+            eruption.onClick();
         }
-
-
-
-
-
-
     }
 
     @EventHandler
     public void onClick(PlayerInteractEvent event){
-        if((event.getAction() != Action.LEFT_CLICK_BLOCK) || event.getAction() != Action.LEFT_CLICK_AIR){return;}
+        if((event.getAction() != Action.LEFT_CLICK_BLOCK) && event.getAction() != Action.LEFT_CLICK_AIR){return;}
         Player player = event.getPlayer();
+        final BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 
-        Eruption eruption1 = CoreAbility.getAbility(player, Eruption.class);
+        if (bendingPlayer == null) return;
 
+        bendingPlayer.getBoundAbilityName();
 
-
-
-        if (eruption1 != null) {
-            eruption1.onClick();
-
+        if (bendingPlayer == null) {
+            return;
         }
+        if (bendingPlayer.getBoundAbilityName().equalsIgnoreCase("Eruption")) {
+            System.out.println("shift2");
+            new Eruption(player);
+        }
+
+
 
 
 

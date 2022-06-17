@@ -1,0 +1,10 @@
+name: Eruption
+author: Roxo
+version: '${project.version}'
+api-version: 1.18
+main: me.roxo.eruption.Eruption
+depend: [ProjectKorra]
+eruption.player:
+  default: true
+  children:
+    bending.ability.Eruption: true
