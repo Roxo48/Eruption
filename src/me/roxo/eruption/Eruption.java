@@ -404,7 +404,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
                 Objects.requireNonNull(Bukkit.getServer().getWorld("world")).createExplosion(rightVoc, 4F, false, false);
                 Objects.requireNonNull(Bukkit.getServer().getWorld("world")).createExplosion(middleVoc, 4F, false, false);
                 //TODO get all blocks in the curve of the pools (center)
-                //TOD cancel in 3 sec
                 count++;
             }
         };
