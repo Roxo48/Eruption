@@ -407,6 +407,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
                 count++;
             }
         };
+
         for (int i = tempBlocks.size(); i < allBlocks.size(); i++) {
             Block blockonvoc = allBlocks.get(i);
             if (GeneralMethods.isSolid(blockonvoc)) {
