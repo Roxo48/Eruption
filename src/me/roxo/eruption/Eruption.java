@@ -31,9 +31,9 @@ public class Eruption extends LavaAbility implements AddonAbility {
     private Block sourceBlock;
     private List<TempBlock> tempBlocks;
 
-    private Location blockloc;
-    private Location blockloc2;
-    private Location blockloc3;
+    private Location blockLocOne;
+    private Location blockLocTwo;
+    private Location blockLocThree;
 
     private State state;
     private Listener listener;
@@ -61,9 +61,10 @@ public class Eruption extends LavaAbility implements AddonAbility {
             remove();
             return;
         }
-         blockloc = player.getLocation().add(-12 ,0,0).getBlock().getLocation();
-         blockloc2 = player.getLocation().add(-8 ,0,8).getBlock().getLocation();
-         blockloc3 = player.getLocation().add(-8 ,0,-8).getBlock().getLocation();
+        setFields();
+         blockLocOne = player.getLocation().add(-12 ,0,0).getBlock().getLocation();
+         blockLocTwo = player.getLocation().add(-8 ,0,8).getBlock().getLocation();
+         blockLocThree = player.getLocation().add(-8 ,0,-8).getBlock().getLocation();
         state = State.SOURCE;
 
 //        Eruption eruption = getAbility(player, getClass());
@@ -82,9 +83,9 @@ public class Eruption extends LavaAbility implements AddonAbility {
     }
 
     private void setFields() {
-        this.SPEED = ConfigManager.getConfig().getInt("Eruption.SPEED");//this will amke it how many click (cloud steps)
-        this.SOURCE_RANGE = ConfigManager.getConfig().getLong("Eruption.SOURCE_RANGE");
-        this.RANGE = ConfigManager.getConfig().getDouble("Eruption.RANGE");
+        SPEED = ConfigManager.getConfig().getInt("Eruption.SPEED");//this will amke it how many click (cloud steps)
+        SOURCE_RANGE = ConfigManager.getConfig().getLong("Eruption.SOURCE_RANGE");
+        RANGE = ConfigManager.getConfig().getDouble("Eruption.RANGE");
 
     }
 
@@ -362,15 +363,16 @@ public class Eruption extends LavaAbility implements AddonAbility {
     private void progressShoot() {
         //TODO if player left clicks then do this.
         player.sendMessage(ChatColor.RED + " You feel the molten rock heating up awaiting to rise and erupt...");
+
         Material lava = Material.LAVA;
+
         Location locationOfPlayer = GeneralMethods.getTargetedLocation(player, 10);
 
-        Location locOfMiddleVoc = player.getLocation().add(-12,5,0);
-
         Location leftVoc,middleVoc,rightVoc;
-        middleVoc = blockloc.add(0,6,0);
-        leftVoc = blockloc.add(0,6,0);
-        rightVoc = blockloc.add(0,6,0);
+        middleVoc = blockLocOne.add(0,6,0);
+        leftVoc = blockLocOne.add(0,6,0);
+        rightVoc = blockLocOne.add(0,6,0);
+
         Vector trajectory = locationOfPlayer.toVector();
 
 
@@ -390,14 +392,20 @@ public class Eruption extends LavaAbility implements AddonAbility {
        allBlocks.addAll(rightBlocks);
        allBlocks.addAll(middleBlocks);
        allBlocks.addAll(leftBlocks);
+
         BukkitRunnable runnable = new BukkitRunnable() {
+            int count = 0;
             @Override
             public void run() {
+                if (count >= 3000){
+                    cancel();
+                }
                 Objects.requireNonNull(Bukkit.getServer().getWorld("world")).createExplosion(leftVoc, 4F, false, false);
                 Objects.requireNonNull(Bukkit.getServer().getWorld("world")).createExplosion(rightVoc, 4F, false, false);
                 Objects.requireNonNull(Bukkit.getServer().getWorld("world")).createExplosion(middleVoc, 4F, false, false);
-
-
+                //TODO get all blocks in the curve of the pools (center)
+                //TOD cancel in 3 sec
+                count++;
             }
         };
         for (int i = tempBlocks.size(); i < allBlocks.size(); i++) {
