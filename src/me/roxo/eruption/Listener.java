@@ -2,9 +2,12 @@ package me.roxo.eruption;
 
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
@@ -12,11 +15,7 @@ import static com.projectkorra.projectkorra.ability.CoreAbility.getAbility;
 
 public class Listener implements org.bukkit.event.Listener {
 
-    private  final Eruption eruption;
 
-    public Listener(Eruption eruption) {
-        this.eruption = eruption;
-    }
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event){
@@ -26,11 +25,9 @@ public class Listener implements org.bukkit.event.Listener {
 
         Eruption eruption = CoreAbility.getAbility(player, Eruption.class);
 
-        System.out.println("click");
 
         if (eruption != null) {
-            System.out.println("click WORKS");
-            eruption.onClick();
+            eruption.onShift();
         }
     }
 
@@ -48,18 +45,8 @@ public class Listener implements org.bukkit.event.Listener {
             return;
         }
         if (bendingPlayer.getBoundAbilityName().equalsIgnoreCase("Eruption")) {
-            System.out.println("shift2");
             new Eruption(player);
         }
-
-
-
-
-
-
-
-
-
 
     }
 
