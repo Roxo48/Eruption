@@ -324,7 +324,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         return points;
     }
 
-        public void placeLavaPool(Location location){
+    public void placeLavaPool(Location location){
         Location pos;
         List<Block> blockList = new ArrayList<>();
         for(int i = -3; i <= 3; i++){
