@@ -1,7 +1,7 @@
 name: Eruption
 author: Roxo
 version: '${project.version}'
-api-version: 1.18
+api-version: 1.17
 main: me.roxo.eruption.Eruption
 depend: [ProjectKorra]
 eruption.player:

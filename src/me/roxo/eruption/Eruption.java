@@ -277,6 +277,13 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
     public void progressShoot() {
         Location locationOfPlayer = GeneralMethods.getTargetedLocation(player, RANGE);
+        if(locationOfPlayer.getBlock().getType() == Material.AIR){
+            int y = 0;
+            while(locationOfPlayer.clone().add(0,y,0).getBlock().getType() == Material.AIR){
+                y--;
+            }
+           locationOfPlayer = locationOfPlayer.clone().add(0,y,0);
+        }
 
         Location middleOfMiddle = locationOfPlayer.clone().add(0,20,0);
 
@@ -290,11 +297,12 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
         List<Location> locations3 = getLocationBezier(blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer,100);
 
-              BukkitRunnable br = new BukkitRunnable() {
+        Location finalLocationOfPlayer = locationOfPlayer;
+        BukkitRunnable br = new BukkitRunnable() {
                   @Override
                   public void run() {
                       if(a >= 100){
-                          placeLavaPool(locationOfPlayer);
+                          placeLavaPool(finalLocationOfPlayer);
                           cancel();
                       }
                       Location point = locations.get(a);
@@ -446,7 +454,8 @@ public class Eruption extends LavaAbility implements AddonAbility {
     @Override
     public String getDescription(){
         return "\"Elements Of The Avatar Addons:\"\n" +
-                 "\"Erupt a storm of lava by forming multiple Geysers to create lava pools\"";
+                 "\"Erupt a storm of lava by forming multiple Geysers to create lava pools" +
+                "\nLeft Click on a lava source 3x3 and then Shift to activate.";
     }
 
     @Override
