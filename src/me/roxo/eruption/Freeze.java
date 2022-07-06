@@ -34,13 +34,14 @@ public class Freeze extends BukkitRunnable {
     public void run() {
 
         if(tick == time){
+            Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(0), 2 , false ,false);
+            Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(1), 2 , false ,false);
+            Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(2), 2 , false ,false);
             eruption.progressShoot();
             cancel();
             return;
         }
-        Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(0), 2 , false ,false);
-        Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(1), 2 , false ,false);
-        Bukkit.getServer().getWorld(player.getWorld().getName()).createExplosion(eruption.getLocations().get(2), 2 , false ,false);
+        player.playSound(player.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 1,1);
 
         tick++;
 

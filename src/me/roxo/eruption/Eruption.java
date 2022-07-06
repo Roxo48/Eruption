@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,6 +38,8 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
     private static long COOLDOWN;
 
+    private static long SPEED_LAVAFLOW;
+
     private static int TIME_ERUPTION;
 
     private Block sourceBlock;
@@ -44,6 +47,9 @@ public class Eruption extends LavaAbility implements AddonAbility {
     private Location blockLocOne;
     private Location blockLocTwo;
     private Location blockLocThree;
+
+    private int a;
+
 
     private State state;
     private Listener listener;
@@ -82,6 +88,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         state = State.SOURCE;
 
         runAsh = false;
+         a = 0;
 
         Eruption eruption = getAbility(player, getClass());
 
@@ -101,6 +108,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         RANGE = ConfigManager.getConfig().getDouble("Eruption.RANGE_LAVA");
         TIME_ERUPTION = ConfigManager.getConfig().getInt("Eruption.TIME_ERUPTION");
         COOLDOWN = ConfigManager.getConfig().getLong("Eruption.COOLDOWN");
+        SPEED_LAVAFLOW = ConfigManager.getConfig().getLong("Eruption.SPEED_LAVAFLOW");
     }
 
     @Override
@@ -252,7 +260,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
         }
     }
 
-
     private List<Block> getBlocksOFVolcano(Location loc) {
         List<Block> blockList = new ArrayList<>();
         Location pos;
@@ -298,62 +305,41 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
         Location middleOfLeft = locationOfPlayer.clone().add(0,20,0);
 
-        List<Location> locations = getLocationBezier(blockLocOne.clone().add(0,3,0), middleOfMiddle ,locationOfPlayer,70);
-//
-        List<Location> locations2 = getLocationBezier(blockLocTwo.clone().add(0,3,0), middleOfRight ,locationOfPlayer,70);
-//
-       List<Location> locations3 = getLocationBezier(blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer,70);
+        List<Location> locations = getLocationBezier(blockLocOne.clone().add(0,3,0), middleOfMiddle ,locationOfPlayer,100);
 
-//        for(int i = 0; i <= 100; i++){
-//            double start = System.currentTimeMillis();
-////            while(System.currentTimeMillis() - start <= 200){
-////                //Bukkit.getServer().broadcastMessage(System.currentTimeMillis() - start + "");
-////            }
-//            float a = i / 100;
-//            //points.add(bezierPoint(a,p0,p1,p2));
-//            TempBlock tempBlock = new TempBlock(bezierPoint(a,blockLocOne.clone().add(0,3,0), middleOfMiddle ,locationOfPlayer).getBlock(), Material.LAVA);
-//            tempBlock.setRevertTime(5000);
-//            TempBlock tempBlock2 = new TempBlock(bezierPoint(a,blockLocTwo.clone().add(0,3,0), middleOfRight ,locationOfPlayer).getBlock(), Material.LAVA);
-//            tempBlock2.setRevertTime(5000);
-//            TempBlock tempBlock3 = new TempBlock(bezierPoint(a,blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer).getBlock(), Material.LAVA);
-//            tempBlock3.setRevertTime(5000);
-//        }
+        List<Location> locations2 = getLocationBezier(blockLocTwo.clone().add(0,3,0), middleOfRight ,locationOfPlayer,100);
 
-        int a = 0;
-         while(a <= 70){
-             double start = System.currentTimeMillis();
-             System.out.println("BYE");
-             Location point = locations.get(a);
-             TempBlock tempBlock = new TempBlock(point.getBlock(), Material.LAVA);
-             tempBlock.setRevertTime(5000);
-             Location point2 = locations2.get(a);
-             TempBlock tempBlock2 = new TempBlock(point2.getBlock(), Material.LAVA);
-             tempBlock2.setRevertTime(5000);
-             Location point3 = locations3.get(a);
-             TempBlock tempBlock3 = new TempBlock(point3.getBlock(), Material.LAVA);
-             tempBlock3.setRevertTime(5000);
-             a++;
-             while(System.currentTimeMillis() - start <= 35){
-                 System.out.println("HI");
-             }
-         }
+       List<Location> locations3 = getLocationBezier(blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer,100);
 
+              BukkitRunnable br = new BukkitRunnable() {
+                  @Override
+                  public void run() {
+                      if(a >= 100){
+                          placeLavaPool(locationOfPlayer);
+                          cancel();
+                      }
+                      Location point = locations.get(a);
+                      TempBlock tempBlock = new TempBlock(point.getBlock(), Material.LAVA);
+                      tempBlock.setRevertTime(5000);
 
+                      Location point2 = locations2.get(a);
+                      TempBlock tempBlock2 = new TempBlock(point2.getBlock(), Material.LAVA);
+                      tempBlock2.setRevertTime(5000);
 
-        placeLavaPool(locationOfPlayer);
+                      Location point3 = locations3.get(a);
+                      TempBlock tempBlock3 = new TempBlock(point3.getBlock(), Material.LAVA);
+                      tempBlock3.setRevertTime(5000);
+                      a++;
+                  }
+              };
+              br.runTaskTimer(ProjectKorra.plugin, SPEED_LAVAFLOW,0);
         burnPlayers(locationOfPlayer);
         }
     public List<Location> getLocationBezier(Location p0,Location p1,Location p2,float t){
         List<Location> points = new ArrayList<>();
-//        double start = System.currentTimeMillis();
         for(int i = 0; i <= t; i ++){
-            double start = System.currentTimeMillis();
-//            while(System.currentTimeMillis() - start <= 500){
-//                Bukkit.getServer().broadcastMessage(System.currentTimeMillis() - start + "");
-//            }
             float a = i / t;
             points.add(bezierPoint(a,p0,p1,p2));
-
         }
         return points;
     }
@@ -386,11 +372,9 @@ public class Eruption extends LavaAbility implements AddonAbility {
             TempBlock clearBlock1 = new TempBlock(block1, Material.LAVA);
             clearBlock1.setRevertTime(6500);
         }
-
             this.bPlayer.addCooldown(this);
             remove();
         }
-
     public void burnPlayers(Location location){
         List<Entity> players = GeneralMethods.getEntitiesAroundPoint(location, 20);
         for(Entity player1 : players){
@@ -401,7 +385,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
             }
             player1.setFireTicks(500);
         }
-
     }
      public void blindPlayers(){
          Location location1 = player.getLocation().clone().add(0,18,0);
@@ -409,6 +392,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
              @Override
              public void run() {
                  if(runAsh){cancel();}
+
                  ParticleEffect.CAMPFIRE_COSY_SMOKE.display(blockLocOne.clone().add(0,3,0), 10, 1.5,5,1.5);
                  ParticleEffect.CAMPFIRE_COSY_SMOKE.display(blockLocTwo.clone().add(0,3,0), 10, 1.5,5,1.5);
                  ParticleEffect.CAMPFIRE_COSY_SMOKE.display(blockLocThree.clone().add(0,3,0), 10, 1.5,5,1.5);
@@ -416,10 +400,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
          };
          bukkitRunnable.runTaskTimer(ProjectKorra.plugin,0, 20);
      }
-
-
     public Location bezierPoint(float t, Location p0, Location p1, Location p2){
-
        // pFinal[0] = Math.pow(1 - t, 2) * p0[0] + (1-t) * 2 * t * p1[0] + t * t * p2[0];
        // pFinal[1] = Math.pow(1 - t, 2) * p0[1] + (1-t) * 2 * t * p1[1] + t * t * p2[1];
         return p0.clone().multiply((1-t)*(1-t)).add(p1.clone().multiply((1-t) * 2 * t)).add(p2.clone().multiply(t*t));
@@ -430,8 +411,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
             state = State.BIULDVOCANOS;
         }
     }
-
-
 
     @Override
     public boolean isSneakAbility() {
@@ -471,6 +450,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         config.addDefault("Eruption.RANGE_LAVA",(Object) 15);
         config.addDefault("Eruption.COOLDOWN",(Object) 12000);
         config.addDefault("Eruption.TIME_ERUPTION", (Object) 5);
+        config.addDefault("Eruption.SPEED_LAVAFLOW", (Object) 4);
         ConfigManager.defaultConfig.save();
     }
 
