@@ -2,36 +2,25 @@ package me.roxo.eruption;
 
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ProjectKorra;
-import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.LavaAbility;
 import com.projectkorra.projectkorra.configuration.ConfigManager;
 import com.projectkorra.projectkorra.util.ParticleEffect;
 import com.projectkorra.projectkorra.util.TempBlock;
-import net.minecraft.server.v1_16_R3.GeneratorAccess;
-import net.minecraft.world.item.ItemFireworks;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 
 public class Eruption extends LavaAbility implements AddonAbility {
     private Location location;
-    private Vector direction;
 
     private static double SOURCE_RANGE;
     private static double RANGE;
@@ -47,10 +36,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
     private Location blockLocOne;
     private Location blockLocTwo;
     private Location blockLocThree;
-
     private int a;
-
-
     private State state;
     private Listener listener;
     private Permission perm;
@@ -58,12 +44,11 @@ public class Eruption extends LavaAbility implements AddonAbility {
     private List<Location> locations;
     private boolean runAsh;
     int count = 0;
-
     private Block block;
 
     public Eruption(Player player) {
         super(player);
-        if (!bPlayer.canBend((CoreAbility) this)) {
+        if (!bPlayer.canBend(this)) {
             remove();
             return;
         }
@@ -100,7 +85,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
     }
 
     public void effect(final Location loc) {
-        ParticleEffect.ASH.display(loc, 30, 0, .5, 0);
+        ParticleEffect.ASH.display(loc, 35, 0, .4, 0);
     }
 
     private void setFields() {
@@ -113,7 +98,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
     @Override
     public void progress() {
-
         if (this.player.isDead() || !this.player.isOnline()) {
             this.remove();
             return;
@@ -126,16 +110,13 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
         block = getLavaSourceBlock(player, getName(), SOURCE_RANGE);
         if (block == null) return;
-        //TODO SET THE LAVA TICK TO 1 or 0
-        if (!CoreAbility.hasAbility(player, this.getClass())) {
-            return;
-        }
-        //if (!bPlayer.canBendIgnoreBinds(this)) {return;}
+
+        if (!CoreAbility.hasAbility(player, this.getClass())) {return;}
         if (bPlayer.isOnCooldown(this)){ remove(); return;}
+
         sourceBlock = block;
         location = player.getLocation();
-        tempBlocks = new LinkedList<TempBlock>();
-
+        tempBlocks = new LinkedList<>();
 
         switch (state) {
             case SOURCE -> {
@@ -152,16 +133,13 @@ public class Eruption extends LavaAbility implements AddonAbility {
                     player.sendMessage(ChatColor.RED + " You feel the molten rock heating up awaiting to rise and erupt...");
                     freeze.runTaskTimer(this.getElement().getPlugin(),0,20 );
                 }
-
                 count++;
-//                progressShoot();
             }
         }
     }
 
     private void progressSource() {
         effect(sourceBlock.getLocation());
-//        player.sendMessage(ChatColor.GREEN + "Source Selected");
         Location location1 = sourceBlock.getLocation();
         for(int i = -1; i < 1; i++){
             for(int j = -1; j < 1; j++){
@@ -213,7 +191,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
     private void progressBuild() {
          player.getEyeLocation().getYaw();
-         //todo these are all mixed up.
+
          if(rpGetPlayerDirection(player) == 1){//west 0
              blockLocOne = location.clone().add(8,0,0);
              blockLocTwo = location.clone().add(10 ,0,10);
@@ -232,28 +210,28 @@ public class Eruption extends LavaAbility implements AddonAbility {
              blockLocThree = location.clone().add(-10 ,0,-10);
          }
          locations.add(blockLocOne);
-        locations.add(blockLocTwo);
-        locations.add(blockLocThree);
-        List<Block> blockListOne = new ArrayList<>(getBlocksOFVolcano(blockLocOne));
-        List<Block> blockListTwo = new ArrayList<>(getBlocksOFVolcano(blockLocTwo));
-        List<Block> blockListThree = new ArrayList<>(getBlocksOFVolcano(blockLocThree));
-        List<Block> blockList = new ArrayList<>();
-        blockList.addAll(blockListOne);
-        blockList.addAll(blockListTwo);
-        blockList.addAll(blockListThree);
-        playEarthbendingSound(player.getLocation());
-        for (int i = tempBlocks.size(); i < blockList.size(); i++) {
-            Block blockonvoc = blockList.get(i);
-            if (GeneralMethods.isSolid(blockonvoc)) {
-                if (TempBlock.isTempBlock(blockonvoc)) {
-                    TempBlock tb = TempBlock.get(blockonvoc);
-                    if (!tempBlocks.contains(tb)) {
-                        state = State.SHOOTLAVA;
-                        return;
+         locations.add(blockLocTwo);
+         locations.add(blockLocThree);
+         List<Block> blockListOne = new ArrayList<>(getBlocksOFVolcano(blockLocOne));
+         List<Block> blockListTwo = new ArrayList<>(getBlocksOFVolcano(blockLocTwo));
+         List<Block> blockListThree = new ArrayList<>(getBlocksOFVolcano(blockLocThree));
+         List<Block> blockList = new ArrayList<>();
+         blockList.addAll(blockListOne);
+         blockList.addAll(blockListTwo);
+         blockList.addAll(blockListThree);
+         playEarthbendingSound(player.getLocation());
+            for (int i = tempBlocks.size(); i < blockList.size(); i++) {
+                Block blockonvoc = blockList.get(i);
+                if (GeneralMethods.isSolid(blockonvoc)) {
+                    if (TempBlock.isTempBlock(blockonvoc)) {
+                        TempBlock tb = TempBlock.get(blockonvoc);
+                        if (!tempBlocks.contains(tb)) {
+                            state = State.SHOOTLAVA;
+                            return;
+                        }
+                    } else if (blockonvoc != sourceBlock) {
                     }
-                } else if (blockonvoc != sourceBlock) {
                 }
-            }
             TempBlock tempBlock = new TempBlock(blockonvoc, Material.BROWN_CONCRETE);
             tempBlocks.add(tempBlock);
             tempBlock.setRevertTime(10000);
@@ -296,6 +274,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         }
         return blockList;
     }
+
     public void progressShoot() {
         Location locationOfPlayer = GeneralMethods.getTargetedLocation(player, RANGE);
 
@@ -309,7 +288,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
         List<Location> locations2 = getLocationBezier(blockLocTwo.clone().add(0,3,0), middleOfRight ,locationOfPlayer,100);
 
-       List<Location> locations3 = getLocationBezier(blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer,100);
+        List<Location> locations3 = getLocationBezier(blockLocThree.clone().add(0,3,0), middleOfLeft ,locationOfPlayer,100);
 
               BukkitRunnable br = new BukkitRunnable() {
                   @Override
@@ -335,6 +314,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
               br.runTaskTimer(ProjectKorra.plugin, SPEED_LAVAFLOW,0);
         burnPlayers(locationOfPlayer);
         }
+
     public List<Location> getLocationBezier(Location p0,Location p1,Location p2,float t){
         List<Location> points = new ArrayList<>();
         for(int i = 0; i <= t; i ++){
@@ -343,6 +323,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         }
         return points;
     }
+
         public void placeLavaPool(Location location){
         Location pos;
         List<Block> blockList = new ArrayList<>();
@@ -375,6 +356,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
             this.bPlayer.addCooldown(this);
             remove();
         }
+
     public void burnPlayers(Location location){
         List<Entity> players = GeneralMethods.getEntitiesAroundPoint(location, 20);
         for(Entity player1 : players){
@@ -386,6 +368,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
             player1.setFireTicks(500);
         }
     }
+
      public void blindPlayers(){
          Location location1 = player.getLocation().clone().add(0,18,0);
          BukkitRunnable bukkitRunnable = new BukkitRunnable() {
@@ -400,6 +383,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
          };
          bukkitRunnable.runTaskTimer(ProjectKorra.plugin,0, 20);
      }
+
     public Location bezierPoint(float t, Location p0, Location p1, Location p2){
        // pFinal[0] = Math.pow(1 - t, 2) * p0[0] + (1-t) * 2 * t * p1[0] + t * t * p2[0];
        // pFinal[1] = Math.pow(1 - t, 2) * p0[1] + (1-t) * 2 * t * p1[1] + t * t * p2[1];
@@ -437,7 +421,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
         return location;
     }
 
-
     @Override
     public void load() {
         perm = new Permission("bending.ability.eruption");
@@ -459,6 +442,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         HandlerList.unregisterAll(listener);
         ProjectKorra.plugin.getServer().getPluginManager().removePermission(perm);
     }
+
     @Override
     public String getDescription(){
         return "\"Elements Of The Avatar Addons:\"\n" +
@@ -474,7 +458,6 @@ public class Eruption extends LavaAbility implements AddonAbility {
     public String getVersion() {
         return "1.17";
     }
-
 
     @Override
     public List<Location> getLocations() {
