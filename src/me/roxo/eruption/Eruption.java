@@ -85,7 +85,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
     }
 
     public void effect(final Location loc) {
-        ParticleEffect.ASH.display(loc, 35, 0, .4, 0);
+        ParticleEffect.ASH.display(loc, 45, .15, .4, .15);
     }
 
     private void setFields() {
@@ -108,7 +108,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
             return;
         }
 
-        block = getLavaSourceBlock(player, getName(), SOURCE_RANGE);
+        block = GeneralMethods.getTargetedLocation(player,SOURCE_RANGE).clone().add(0,-1,0).getBlock();
         if (block == null) return;
 
         if (!CoreAbility.hasAbility(player, this.getClass())) {return;}
@@ -139,17 +139,12 @@ public class Eruption extends LavaAbility implements AddonAbility {
     }
 
     private void progressSource() {
-        effect(sourceBlock.getLocation());
+
         Location location1 = sourceBlock.getLocation();
-        for(int i = -1; i < 1; i++){
-            for(int j = -1; j < 1; j++){
-                Location location2 = location1.clone().add(i,0,j);
-                if(location2.getBlock().getType() != Material.LAVA){
-                    remove();
-                }
-            }
+        if (isEarthbendable(player, sourceBlock) || isLavabendable(player, sourceBlock)) {
+            effect(sourceBlock.getLocation());
         }
-        if (sourceBlock.getLocation().distanceSquared(player.getLocation()) > SOURCE_RANGE * SOURCE_RANGE || !isLavabendable(player, sourceBlock)) {
+        if (!isEarthbendable(player, sourceBlock) && !isLavabendable(player, sourceBlock)) {
             remove();
         }
 
@@ -441,7 +436,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         config.addDefault("Eruption.RANGE_LAVA",(Object) 15);
         config.addDefault("Eruption.COOLDOWN",(Object) 12000);
         config.addDefault("Eruption.TIME_ERUPTION", (Object) 5);
-        config.addDefault("Eruption.SPEED_LAVAFLOW", (Object) 4);
+        config.addDefault("Eruption.SPEED_LAVAFLOW", (Object) 2);
         ConfigManager.defaultConfig.save();
     }
 
